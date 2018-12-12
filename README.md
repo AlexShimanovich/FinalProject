@@ -1,6 +1,6 @@
-# Final project
 # Directed Graph Separator 
-# Abstract
+
+## Abstract
 Efficient algorithms for finding directed graph separators can help solving NP problems, parallel computing task etc
 
 ## Project work diary
