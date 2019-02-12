@@ -68,12 +68,15 @@ public abstract class NetworkFlowSolverBase {
 	protected long bigMaxFlow;
 	protected long minCost; //not relevant
 
+	//nodes left of cut
 	protected boolean[] leftOfCut;
 	protected boolean[] bigLeftOfCut;
-	protected static ArrayList<Integer> originalCutNodes = new ArrayList<Integer>();
+
+	//array of adjacency lists, representing the graph
 	protected List<Edge>[] graph;
 	protected List<Edge>[] bigGraph;
 
+	protected static ArrayList<Integer> originalCutNodes = new ArrayList<Integer>();
 	protected static ArrayList<Edge> cutEdges = new ArrayList<Edge>();
 
 	// 'visited' and 'visitedToken' are variables used for graph sub-routines to 
@@ -113,7 +116,7 @@ public abstract class NetworkFlowSolverBase {
 	// Construct an empty graph with n nodes including the source and sink nodes.
 	private void initializeGraph() {
 		graph = new List[n];
-		for (int i = s; i <= t; i++)
+		for (int i = 0; i < graph.length; i++)
 			graph[i] = new ArrayList<Edge>();
 	}
 
@@ -152,8 +155,8 @@ public abstract class NetworkFlowSolverBase {
 			}				 					
 	}*/
 	
-	//create big graph based on conversion of real graph - each vertex becomes two vertices and edge
-	//create edge from each vertices, make it minimal capacity (1) so it will be selected as min cut
+	//create big graph based on conversion of real graph - each vertex becomes two vertices and edge.
+	//create edge from each vertice, make it minimal capacity (1) so it will be selected as min cut
 	//so we can know which nodes in original graph are the cut nodes
 	public void initBigGraph() {
 		bigGraph = new List[bigN];
@@ -161,7 +164,7 @@ public abstract class NetworkFlowSolverBase {
 			bigGraph[i] = new ArrayList<Edge>();
 		}
 		
-		for (int i = s; i < t; i++) {
+		for (int i = 0; i < graph.length; i++) {
 			int newCapacity = 1;
 			if(i == s || i == t)
 				newCapacity = bigGraph.length * 2; //if its sink or source node we make its edge capacity large
@@ -188,11 +191,10 @@ public abstract class NetworkFlowSolverBase {
 		
 		
 		//print big graph
-		for (int i = 1; i < bigGraph.length; i++) {
-			System.out.println("big graph node i = " + i);
+		for (int i = 0; i < bigGraph.length; i++) {
+			System.out.println("Big graph node i = " + i);
 			for (Edge e : bigGraph[i]) {
-				System.out.println(e.toString(e.from, e.to));
-				
+				System.out.println(e.toString(e.from, e.to));				
 			}					
 		}
 				

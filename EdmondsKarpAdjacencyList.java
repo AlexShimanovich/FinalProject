@@ -71,7 +71,6 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 				for(Edge edge : cutEdges) {
 					if(edge.to == i)
 						cutEdges.remove(edge);
-
 				}
 			}
 		}
@@ -211,11 +210,11 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		EdmondsKarpAdjacencyList solver;
 		solver = new EdmondsKarpAdjacencyList(n, s, t);
 
-		// Source edges
+
 		solver.addEdge(0, 1, 1);
 		solver.addEdge(0, 2, 1);
 		solver.addEdge(0, 3, 1);
-//		solver.addEdge(1,5,9);
+
 		solver.addEdge(1, 4, 1);
 		solver.addEdge(2, 4, 1);
 		solver.addEdge(3, 4, 1);
@@ -227,6 +226,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		solver.addEdge(5, 8, 1);
 		solver.addEdge(6, 8, 1);
 		solver.addEdge(7, 8, 1);
+		
 		/*
 		int n = 5;
 		int s = 1;
