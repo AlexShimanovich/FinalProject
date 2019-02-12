@@ -76,8 +76,8 @@ public abstract class NetworkFlowSolverBase {
 	protected List<Edge>[] graph;
 	protected List<Edge>[] bigGraph;
 
-	protected static ArrayList<Integer> originalCutNodes = new ArrayList<Integer>();
-	protected static ArrayList<Edge> cutEdges = new ArrayList<Edge>();
+	protected ArrayList<Integer> originalCutNodes;
+	protected ArrayList<Edge> cutEdges;
 
 	// 'visited' and 'visitedToken' are variables used for graph sub-routines to 
 	// track whether a node has been visited or not. In particular, node 'i' was 
@@ -111,6 +111,8 @@ public abstract class NetworkFlowSolverBase {
 		visited = new int[n];
 		bigLeftOfCut = new boolean[bigN];
 		bigVisited = new int[bigN];
+		originalCutNodes = new ArrayList<Integer>();
+		cutEdges =  new ArrayList<Edge>();
 	}
 
 	// Construct an empty graph with n nodes including the source and sink nodes.
@@ -155,15 +157,15 @@ public abstract class NetworkFlowSolverBase {
 			}				 					
 	}*/
 	
-	//create big graph based on conversion of real graph - each vertex becomes two vertices and edge.
-	//create edge from each vertice, make it minimal capacity (1) so it will be selected as min cut
+	//create in solver a big graph based on conversion of real graph - each vertex becomes two vertices and edge.
+	//create edge from each vertex, make it minimal capacity (1) so it will be selected as min cut
 	//so we can know which nodes in original graph are the cut nodes
 	public void initBigGraph() {
 		bigGraph = new List[bigN];
 		for (int i = 0; i < bigGraph.length; i++) {
 			bigGraph[i] = new ArrayList<Edge>();
 		}
-		
+		//add two vertices with edge per each original vertex
 		for (int i = 0; i < graph.length; i++) {
 			int newCapacity = 1;
 			if(i == s || i == t)
@@ -179,7 +181,8 @@ public abstract class NetworkFlowSolverBase {
 			//convert existing edges
 			for(Edge edge : graph[i]) {	
 				if(!edge.isResidual()) {
-					Edge updatedEdge = new Edge((edge.from * 2) + 1, edge.to * 2, bigGraph.length * 2); //make original edges capacity very big so NOT selected as min cut of bigGraph
+					//make original edges capacity very big so NOT selected as min cut of bigGraph
+					Edge updatedEdge = new Edge((edge.from * 2) + 1, edge.to * 2, bigGraph.length * 2); 
 					Edge updatedEdgeResidual = new Edge(edge.to * 2, (edge.from * 2) + 1, 0);
 					updatedEdge.residual = updatedEdgeResidual;
 					updatedEdgeResidual.residual = updatedEdge;
@@ -191,12 +194,12 @@ public abstract class NetworkFlowSolverBase {
 		
 		
 		//print big graph
-		for (int i = 0; i < bigGraph.length; i++) {
-			System.out.println("Big graph node i = " + i);
-			for (Edge e : bigGraph[i]) {
-				System.out.println(e.toString(e.from, e.to));				
-			}					
-		}
+//		for (int i = 0; i < bigGraph.length; i++) {
+//			System.out.println("Big graph node i = " + i);
+//			for (Edge e : bigGraph[i]) {
+//				System.out.println(e.toString(e.from, e.to));				
+//			}					
+//		}
 				
 	}
 	
@@ -279,7 +282,7 @@ public abstract class NetworkFlowSolverBase {
 			return;
 		}
 		//big
-		initBigGraph();
+		initBigGraph(); //build big graph based on original graph
 		bigSolvedBFS = true;
 		bigSolveBFS();
 	}
