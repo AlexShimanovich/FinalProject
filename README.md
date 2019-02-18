@@ -1,7 +1,7 @@
 # Directed Graph Separator 
 
 ## Abstract
-Efficient algorithms for finding small balanced vertex separators fro directed graphs can help solving NP problems, parallel computing task etc
+Efficient algorithms for finding small balanced vertex separators for directed graphs can help solving NP problems, parallel computing task etc, we implement and test some of those algorithms.
 
 ## Project work diary
 Please visit the [WIKI](https://github.com/AlexShimanovich/FinalProject/wiki) for project developmend and meetings diary.
