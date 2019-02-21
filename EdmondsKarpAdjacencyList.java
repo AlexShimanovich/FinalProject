@@ -149,7 +149,6 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		bigVisit(bigS);
 		q.offer(bigS);
 		
-		//System.out.println("START bfsssssssssss, current flow: " + CurrentFlow );
 		// Perform BFS from source to sink
 		while(!q.isEmpty()) {
 			int node = q.poll();
@@ -237,7 +236,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		int wRun = 0;
 		long startTimeBFS = System.nanoTime();
 		for (int wSize = 2; wSize < 32; wSize *= 2) {
-			//run twice for same w size
+			//run twice for same W size
 			wRun = 0;
 			while(wRun < 2) {
 				W = getRandomWfromGraph(originalGraph.length, wSize);
@@ -303,12 +302,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 					for(int node : solver.originalCutNodes) {
 						System.out.println(node);						
 					}
-
-					//for testing verdict
-					if(solver.originalCutNodes.size() == 2 && solver.originalCutNodes.contains(6) && solver.originalCutNodes.contains(7)) {
-						long endTimeBFS = System.nanoTime();
-						return;
-					}
+					//TODO verdict here
 							
 				}
 				wRun ++;			
@@ -321,13 +315,16 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 
 	}
 
+	/*
+	 * Select sub group W of vertices from given range
+	 */
 	private static List<Integer> getRandomWfromGraph(int nodesRange, int wSize){
 		List<Integer> W = new ArrayList<Integer>();
 		Random r = new Random();
 		int randomVertex;
 		while(W.size() < wSize) {
 			randomVertex = r.nextInt((nodesRange)); //ints from [0,nodesRange)
-			if( !W.contains(randomVertex))
+			if(!W.contains(randomVertex))
 				W.add(randomVertex);			
 		}
 		return W;		
@@ -378,11 +375,6 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 	 * create solver from given graph containing only nodes from A connected to source and nodes From B connected to target
 	 */
 	private static EdmondsKarpAdjacencyList solverFromOriginal(List<Edge>[] originalGraph, List<Integer> A, List<Integer> B) {
-		/*int maxNodeInW = W.stream()
-			      .mapToInt(v -> v)
-			      .max().orElseThrow(NoSuchElementException::new);*/
-		//System.out.println("max node innnnnnn" + maxNodeInW);
-		
 		//solver from originalGraph + random, solver size w+2, source at location w, target at location w+1
 		EdmondsKarpAdjacencyList solver;
 		int verticesInSolver = originalGraph.length + 2; // +2 because we need space for s and t nodes
