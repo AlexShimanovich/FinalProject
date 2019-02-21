@@ -12,8 +12,8 @@ import java.util.List;
 
 public abstract class NetworkFlowSolverBase {
 
-	// To avoid overflow, set infinity to a value less than Long.MAX_VALUE;
-	protected static final long INF = Long.MAX_VALUE / 2;
+	// To avoid overflow, set infinity to a value less than Integer.MAX_VALUE;
+	protected static final int INF = Integer.MAX_VALUE / 4;
 
 	public static class Edge {
 		public int from, to;
@@ -76,6 +76,7 @@ public abstract class NetworkFlowSolverBase {
 	protected List<Edge>[] graph;
 	protected List<Edge>[] bigGraph;
 
+
 	protected ArrayList<Integer> originalCutNodes;
 	protected ArrayList<Edge> cutEdges;
 
@@ -98,7 +99,7 @@ public abstract class NetworkFlowSolverBase {
 	/**
 	 * Creates an instance of a flow network solver. Use the {@link #addEdge}
 	 * method to add edges to the graph.
-	 *
+	 *n
 	 * @param n - The number of nodes in the graph including source and sink nodes.
 	 * @param s - The index of the source node, 0 <= s < n
 	 * @param t - The index of the sink node, 0 <= t < n, t != s
@@ -169,7 +170,7 @@ public abstract class NetworkFlowSolverBase {
 		for (int i = 0; i < graph.length; i++) {
 			int newCapacity = 1;
 			if(i == s || i == t)
-				newCapacity = bigGraph.length * 2; //if its sink or source node we make its edge capacity large
+				newCapacity =  INF; //if its sink or source node we make its edge capacity large
 			int newFrom = (i * 2);
 			int newTo = (i * 2) + 1;
 			Edge e1 = new Edge(newFrom, newTo, newCapacity); 
@@ -182,7 +183,7 @@ public abstract class NetworkFlowSolverBase {
 			for(Edge edge : graph[i]) {	
 				if(!edge.isResidual()) {
 					//make original edges capacity very big so NOT selected as min cut of bigGraph
-					Edge updatedEdge = new Edge((edge.from * 2) + 1, edge.to * 2, bigGraph.length * 2); 
+					Edge updatedEdge = new Edge((edge.from * 2) + 1, edge.to * 2, INF); 
 					Edge updatedEdgeResidual = new Edge(edge.to * 2, (edge.from * 2) + 1, 0);
 					updatedEdge.residual = updatedEdgeResidual;
 					updatedEdgeResidual.residual = updatedEdge;
