@@ -2,8 +2,7 @@
 //Alex Shimanovich
 
 import java.io.*; 
-import java.util.*; 
-import java.util.LinkedList; 
+import java.util.*;
 
 
 class GreedGraph 
@@ -115,11 +114,11 @@ class GreedGraph
 			System.out.print(v + " "); 
 
 		// Recursion for all the vertices adjacent to this vertex 
-        for(Integer node: adj[v]){ 
-        	//System.out.print("looking at node " + node);
+		for(Integer node: adj[v]){ 
+			//System.out.print("looking at node " + node);
 			if (!visited[node] && separatorArray[node] != separatorToken) 
 				DFSUtil(node, visited, origin, print); 
-        } 
+		} 
 
 	} 
 
@@ -146,7 +145,7 @@ class GreedGraph
 		// Mark all the vertices as not visited (For second DFS) 
 		for (int i = 0; i < V; i++) 
 			visited[i] = false; 
-/*
+		/*
         for(int v = 0; v < gr.V; v++) 
         { 
             System.out.println("Adjacency list of vertex "+ v); 
@@ -173,11 +172,11 @@ class GreedGraph
 
 		Arrays.sort(gr.sizeSccArray);
 		int biggestScc = gr.sizeSccArray[gr.sizeSccArray.length - 1];
-//		if(print) {
-//			System.out.println("Node Origins array: " + Arrays.toString(gr.rootArray));
-//			System.out.println("SCC Size array: " + Arrays.toString(gr.sizeSccArray));
-//			System.out.println("Biggest SCC size is " + biggestScc);
-//		}
+		//		if(print) {
+		//			System.out.println("Node Origins array: " + Arrays.toString(gr.rootArray));
+		//			System.out.println("SCC Size array: " + Arrays.toString(gr.sizeSccArray));
+		//			System.out.println("Biggest SCC size is " + biggestScc);
+		//		}
 		return biggestScc;
 	} 
 
@@ -195,7 +194,7 @@ class GreedGraph
 		int node;
 		separatorToken++;
 		indexesOfSeparator.clear();
-		Random rand = new Random(); /*
+		Random rand = new Random(); 
 		do{
 			for(int i = 0; i < n; i++) {
 				do {
@@ -204,11 +203,11 @@ class GreedGraph
 				separatorArray[node] = separatorToken; //collect all indexes of the separator
 				indexesOfSeparator.add(node); //collect all indexes of the separator
 			}
-		}while(findSCCs(false) > (int)(0.666 * V)); //if this separator creates too big SCC look for another separator*/
-		separatorArray[3] = separatorToken; //collect all indexes of the separator
-		indexesOfSeparator.add(3); //collect all indexes of the separator
-		separatorArray[4] = separatorToken; //collect all indexes of the separator
-		indexesOfSeparator.add(4); //collect all indexes of the separator
+		}while(findSCCs(false) > (int)(0.666 * V)); //if this separator creates too big SCC look for another separator
+//		separatorArray[3] = separatorToken; //collect all indexes of the separator
+//		indexesOfSeparator.add(3); //collect all indexes of the separator
+//		separatorArray[4] = separatorToken; //collect all indexes of the separator
+//		indexesOfSeparator.add(4); //collect all indexes of the separator
 	}
 
 	//move one random node from the separator back to graph
@@ -222,10 +221,10 @@ class GreedGraph
 	}
 
 	// Test engine
-	public static void main(String args[]) 
+	public static void main(String args[]) throws IOException 
 	{ 
 		//test graph
-		GreedGraph g = new GreedGraph(7); 
+		/*GreedGraph g = new GreedGraph(7); 
 		g.addEdge(1, 0); 
 		g.addEdge(0, 2); 
 		g.addEdge(2, 1); 
@@ -233,15 +232,17 @@ class GreedGraph
 		g.addEdge(3, 4); 
 		g.addEdge(4, 5);
 		g.addEdge(5, 6);
-		g.addEdge(6, 4);
+		g.addEdge(6, 4);*/
 
-
+		System.out.println("before Start Ishiiiiit"); 
+		GreedGraph g = TextToGraph("C:\\Users\\JERLocal\\eclipse-workspace\\Test\\src\\10Node.txt");
+		System.out.println("Start Ishiiiiit"); 
 		int iteration = 0;
 		int biggestSCC = 0;
 		LinkedList<Result> results = new LinkedList(); //collect the best results from each run
 		Result res = null;
-		while(iteration < 2) {
-			int separatorSize = 3;
+		while(iteration < 20) {
+			int separatorSize = 5;
 			g.randomSeparator(separatorSize); //create random separator in graph
 			System.out.println("Start ITERATION: " + iteration); 
 			System.out.println("Initial random separator is : " + Arrays.toString(g.indexesOfSeparator.toArray()));
@@ -273,4 +274,53 @@ class GreedGraph
 
 
 	} 
+
+
+	private static GreedGraph TextToGraph(String path) throws IOException {
+		LineNumberReader lnr = new LineNumberReader(new FileReader(path));
+		lnr.setLineNumber(1);
+		StreamTokenizer stok = new StreamTokenizer(lnr);
+		stok.parseNumbers();
+		stok.eolIsSignificant(true);
+		stok.nextToken();
+		int vertices = 0;
+		//parse first line
+		while (stok.ttype != StreamTokenizer.TT_EOL) {
+			if (stok.ttype == StreamTokenizer.TT_NUMBER) {
+				vertices = (int)stok.nval;
+				stok.nextToken();
+				break;
+			}
+			//file ERROR
+		}
+		
+		
+		System.out.println("vertices in graph" + vertices);
+		GreedGraph graphToFill = new GreedGraph(vertices); 
+		int from = 0, to = 0, capacity = 0;
+		//parse all other lines, each line is edge
+		while (stok.ttype != StreamTokenizer.TT_EOF) {
+			stok.nextToken();
+			int lineNum = lnr.getLineNumber();
+			System.out.println("new line: " + lineNum);
+			if (stok.ttype == StreamTokenizer.TT_NUMBER)
+				from = (int)stok.nval; //origin node of line
+			stok.nextToken();
+			while (stok.ttype != StreamTokenizer.TT_EOL && stok.ttype != StreamTokenizer.TT_EOF) { //all other nodes in line are adjoining to origin node				
+				if (stok.ttype == StreamTokenizer.TT_NUMBER) {				
+					to = (int)stok.nval;
+					graphToFill.addEdge(from, to); 
+					System.out.println("edge in line: " + lineNum + " from: " + from + " to: " + to);
+				}
+				stok.nextToken();
+			}
+		}
+		lnr.close();
+		//GreedGraph graphToFill = new GreedGraph(5); 
+		System.out.println("before return");
+		return graphToFill;
+	}
+
+
+
 } 
