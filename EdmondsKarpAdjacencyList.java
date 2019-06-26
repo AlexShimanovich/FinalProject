@@ -1,15 +1,12 @@
-package Test;
 /**
+ * Alex Shimanovich
  * An implementation of the Edmonds-Karp algorithm which is essentially
  * Ford-Fulkerson with a BFS as a method of finding augmenting paths. 
- * This Edmonds-Karp algorithm will allow you to find the max flow through
+ * This Edmonds-Karp algorithm will allow us to find the max flow through
  * a directed graph and the min cut as a byproduct. 
  *
  * Time Complexity: O(VE^2)
- * 
- * @author William Fiset, william.alexandre.fiset@gmail.com
- **/
-//package com.williamfiset.algorithms.graphtheory.networkflow;
+ */
 
 import static java.lang.Math.min;
 
@@ -25,25 +22,21 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import Test.NetworkFlowSolverBase.Edge;
+
 
 public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 
-	/**
-	 * Creates an instance of a flow network solver. Use the {@link #addEdge(int, int, int)}
-	 * method to add edges to the graph.
-	 *
-	 * @param n - The number of nodes in the graph including source and sink nodes.
-	 * @param s - The index of the source node, 0 <= s < n
-	 * @param t - The index of the sink node, 0 <= t < n, t != s
-	 */
+	// Creates an instance of a flow network solver. Use the {@link #addEdge(int, int, int)}
+	// method to add edges to the graph.
+	// @param n - The number of nodes in the graph including source and sink nodes.
+	// @param s - The index of the source node, 0 <= s < n
+	//@param t - The index of the sink node, 0 <= t < n, t != s 
 	public EdmondsKarpAdjacencyList(int n, int s, int t) {
 		super(n, s, t);
 	}
 
-//////////////////////////////////Original BFS///////////////////////////////////////	
-	
-	
+	//////////////////////////////////Original BFS///////////////////////////////////////	
+
 	// Run Edmonds-Karp and compute the max flow from the source to the sink node.
 	@Override
 	public void solveBFS() {
@@ -58,12 +51,13 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 			if (visited(i))
 				leftOfCut[i] = true;
 	}
-	
+
+	//the BFS method, return current bottleneck in graph
+	//@param CurrentFlow
 	private long bfs(long CurrentFlow) {
 		Edge[] prev = new Edge[n];
 		cutEdges.clear();
 		originalCutNodes.clear();
-		// The queue can be optimized to use a faster queue
 		Queue<Integer> q = new ArrayDeque<>(n);
 		visit(s);
 		q.offer(s);
@@ -104,9 +98,10 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		// Return bottleneck flow
 		return bottleNeck;
 	}
-	
-//////////////////////////////////Big BFS///////////////////////////////////////	
-	
+
+	//////////////////////////////////Big BFS///////////////////////////////////////	
+
+	// Run Edmonds-Karp and compute the max flow from the source to the sink node.
 	@Override
 	public void bigSolveBFS() {
 		long flow;
@@ -119,11 +114,10 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		for(int i = 0; i < bigN; i++) {
 			if (bigVisited(i)) {
 				bigLeftOfCut[i] = true;
-				//convert from bigLeftOfCut to leftOfCut
+				//convert from bigLeftOfCut to leftOfCut nodes
 				if(i % 2 == 0)
 					leftOfCut[i / 2] = true;
-				
-				
+
 				//update cut edges, if edge goes to visited node its not in cut
 				ArrayList<Edge> edgesToRemove =  new ArrayList<Edge>();
 				for(Edge edge : cutEdges) {
@@ -133,22 +127,23 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 				cutEdges.removeAll(edgesToRemove);
 			}
 		}
-		
-		//were done, convert from big edges to original graph nodes
+
+		//we are done, convert from big edges to original graph nodes
 		for(Edge edge : cutEdges) {
 			originalCutNodes.add(edge.from / 2);
 		}
-				
+
 	}
-	
+
+	//the BFS method, return current bottleneck in graph
+	//@param CurrentFlow
 	private long bigBfs(long CurrentFlow) {
 		Edge[] prev = new Edge[bigN];
 		cutEdges.clear();
-		// The queue can be optimized to use a faster queue
 		Queue<Integer> q = new ArrayDeque<>(bigN);
 		bigVisit(bigS);
 		q.offer(bigS);
-		
+
 		// Perform BFS from source to sink
 		while(!q.isEmpty()) {
 			int node = q.poll();
@@ -173,7 +168,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 				}								
 			}
 		}
-		
+
 		// Sink not reachable!
 		if (prev[bigT] == null) return 0;
 
@@ -190,7 +185,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		// Return bottleneck flow
 		return bottleNeck;
 	}
-	
+
 	//calculate current flow through the cut
 	private long floww() {
 		long flow = 0;
@@ -199,46 +194,42 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		return flow;	
 	}
 
-//////////////////////////////////MAIN///////////////////////////////////////	
-	
-	/* Example */
-	//"C:\\Users\\JERLocal\\eclipse-workspace\\Test\\src\\alex.txt"
+	//////////////////////////////////MAIN///////////////////////////////////////	
+
 	public static void main(String[] args) throws IOException, InterruptedException {
-		long startTimeBFS = 0;//System.nanoTime();
-		long endTimeBFS = 0;//System.nanoTime();
-		long startTimeDFS = 0;//System.nanoTime();
-		long endTimeDFS = 0;//System.nanoTime();
+		//		long startTimeBFS = 0;//System.nanoTime();
+		//		long endTimeBFS = 0;//System.nanoTime();
+		//		long startTimeDFS = 0;//System.nanoTime();
+		//		long endTimeDFS = 0;//System.nanoTime();
 		separatorEngine();
 	}
 
-
-	//driver function to create and/or read graph from file  
+	//engine function to create and/or read graph from file and find its separator
+	//make sure you cahnge W size according to graph size
 	private static void separatorEngine() throws IOException {
-		
-		//parse txt to adjacency list
-		List<Edge>[] originalGraph = graphFromFile("C:\\Users\\JERLocal\\eclipse-workspace\\Test\\src\\choke.txt");
 
-		originalGraph = growTestGraph(originalGraph, 10);
+		//parse txt to adjacency list
+		List<Edge>[] originalGraph = graphFromFile("C:\\Users\\JERLocal\\eclipse-workspace\\FlowSeparator\\src\\chokeSmall.txt");
+
+		//originalGraph = growTestGraph(originalGraph, 10);
 
 		//print graph
-//		for (int i = 0; i < originalGraph.length; i++) {
-//			System.out.println("graph from text node i = " + i);
-//			for (Edge e : originalGraph[i]) {
-//				System.out.println(e.toString(e.from, e.to));				
-//			}					
-//		}
+		//		for (int i = 0; i < originalGraph.length; i++) {
+		//			System.out.println("graph from text node i = " + i);
+		//			for (Edge e : originalGraph[i]) {
+		//				System.out.println(e.toString(e.from, e.to));				
+		//			}					
+		//		}
+
 		List<Integer> W = new ArrayList<Integer>();
 		List<Integer> A = new ArrayList<Integer>();
 		List<Integer> B = new ArrayList<Integer>();
-		
-		/*
-		 * Algorithm implementation
-		 */
+
+		//Algorithm implementation
 		int wRun = 0;
 		long startTimeBFS = System.nanoTime();
-		for (int wSize = 2; wSize < 32; wSize *= 2) {
-			//run twice for same W size
-			wRun = 0;
+		for (int wSize = 2; wSize < 4; wSize *= 2) {
+			wRun = 0; 	//run twice for same W size
 			while(wRun < 2) {
 				W = getRandomWfromGraph(originalGraph.length, wSize);
 				A = new ArrayList<Integer>();
@@ -250,7 +241,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 				}
 				System.out.println("");
 				int t = (int) Math.min(Math.pow(2, wSize), 256); // t is number of A&B random selections from same W
-				
+
 				for(int repeatSameW = 0; repeatSameW < t; repeatSameW ++){	
 					System.out.println("////////////////// W size is: " + wSize + ", this size runs: " + (wRun+1) + " t is: " + repeatSameW + " out of " + (t-1) );
 					fillAandB(W, A, B);
@@ -265,13 +256,16 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 					}
 					System.out.println("");		
 
-					
+
 					EdmondsKarpAdjacencyList solver = solverFromOriginal(originalGraph, A, B);
 					long maxFlow = solver.getMaxFlow(true);
 					System.out.println("Max flow is: " + maxFlow);
 					if(maxFlow == 0)
 						continue; //no flow, continue to another A and B
-					/*	
+
+
+					//PRINTS
+					/*
 					System.out.println("Nodes Left of cut in BigGraph:");
 					boolean[] x = solver.getMinCut(true); 
 					for(int i = 0; i < x.length - 2; i++){
@@ -283,56 +277,52 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 					for(Edge e : solver.cutEdges) {
 						System.out.println(e.toString(e.from, e.to));			
 					}	
-					*/
-					/*
 					System.out.println("Nodes LEFT of cut in graph:");
 					for(int i = 0; i < solver.leftOfCut.length - 2; i++){  // -2 because we dont want s,t
 						if( solver.leftOfCut[i] && !solver.originalCutNodes.contains(i))
 							System.out.print(i + ",");
 					}
 					System.out.println("");
-					
+
 					System.out.println("Nodes RIGHT of cut in graph:");
 					for(int i = 0; i < solver.leftOfCut.length - 2; i++){ // -2 because we dont want s,t
 						if( !solver.leftOfCut[i] && !solver.originalCutNodes.contains(i) )
 							System.out.print(i + ",");
 					}		
-					System.out.println("");*/
-					
+					System.out.println("");
+					 */
+
 					System.out.println("Cut Nodes in W:");
 					for(int node : solver.originalCutNodes) {
 						System.out.println(node);						
 					}
-					//TODO verdict here
-							
+					//TODO verdict here							
 				}
 				wRun ++;			
 			}
-			
+
 		}
 		long endTimeBFS = System.nanoTime();
 		long total = TimeUnit.MILLISECONDS.convert(endTimeBFS - startTimeBFS, TimeUnit.NANOSECONDS);
-		System.out.println("total time: " +total );
+		System.out.println("Total run time: " + total);
 
 	}
 
-	/*
-	 * Select sub group W of vertices from given range
-	 */
+	// Select sub group W of vertices from given range
 	private static List<Integer> getRandomWfromGraph(int nodesRange, int wSize){
 		List<Integer> W = new ArrayList<Integer>();
 		Random r = new Random();
 		int randomVertex;
 		while(W.size() < wSize) {
-			randomVertex = r.nextInt((nodesRange)); //ints from [0,nodesRange)
+			randomVertex = r.nextInt((nodesRange)); //int from [0,nodesRange)
 			if(!W.contains(randomVertex))
 				W.add(randomVertex);			
 		}
 		return W;		
 	}
-	
+
 	//fill A and B randomly with nodes from W
-	//if A or B reach 0.75 of W size , put rest of nodes in B or A accordingly
+	//if A or B reach 0.75 of W size, put rest of nodes in B or A accordingly
 	private static void fillAandB(List<Integer> W, List<Integer> A, List<Integer> B) {
 		A.clear();
 		B.clear();
@@ -367,14 +357,11 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 			else {
 				B.add(node);	
 			}
-
 		}				
-		
+
 	}
-	
-	/*
-	 * create solver from given graph containing only nodes from A connected to source and nodes From B connected to target
-	 */
+
+	// create solver from given graph containing only nodes from A connected to source and nodes From B connected to target
 	private static EdmondsKarpAdjacencyList solverFromOriginal(List<Edge>[] originalGraph, List<Integer> A, List<Integer> B) {
 		//solver from originalGraph + random, solver size w+2, source at location w, target at location w+1
 		EdmondsKarpAdjacencyList solver;
@@ -386,8 +373,8 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		for (int i = 0; i < originalGraph.length; i++) {
 			//System.out.println("building solver i = " + i);
 			for (Edge e : originalGraph[i]) {			
-					solver.addEdge(e.from, e.to, e.capacity);
-					//System.out.println(e.toString(e.from, e.to));				
+				solver.addEdge(e.from, e.to, e.capacity);
+				//System.out.println(e.toString(e.from, e.to));				
 			}					
 		}
 		//add edges from s to A with big capacity
@@ -398,18 +385,16 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		for(int b : B) {
 			solver.addEdge(b, target, INF);
 		}
-		
+
 		return solver;		
 	}
 
-	
-	/*
-	 * this creates test graph of different sizes based on very specific origin graph, works only with it!
-	 */
+
+	// experimental! creates a test graph of different sizes based on very specific origin graph, works only with it!	 
 	private static List<Edge>[] growTestGraph(List<Edge>[] originalGraph, int grow){
 		List<Edge>[] result = new List[grow + originalGraph.length];
-		
-		
+
+
 		for (int i = 0; i < result.length; i++) {
 			result[i] = new ArrayList<Edge>();
 		}
@@ -428,49 +413,47 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 			LeftNodes.add(node);
 		for(int node = 14 + (grow / 2); node < 14 + grow; node ++)
 			RightNodes.add(node);
-		
-//		for (int i = 0; i < result.length; i++) {
-//			System.out.println("graph from text node i = " + i);
-//			for (Edge e : result[i]) {
-//				System.out.println(e.toString(e.from, e.to));				
-//			}					
-//		}
-		
+
+		//		for (int i = 0; i < result.length; i++) {
+		//			System.out.println("graph from text node i = " + i);
+		//			for (Edge e : result[i]) {
+		//				System.out.println(e.toString(e.from, e.to));				
+		//			}					
+		//		}
+
 		Random rand = new Random();
 		for (int node : LeftNodes) {
 			for(int edgesForNode = 0; edgesForNode < 30; edgesForNode++) {
 				int randomIndex = rand.nextInt(LeftNodes.size());
 				int destinationNode = LeftNodes.get(randomIndex);
-				result[node].add(new Edge(node, destinationNode, 1));
-								
+				result[node].add(new Edge(node, destinationNode, 1));							
 			}				
 		}
-		
+
 		for (int node : RightNodes) {
 			for(int edgesForNode = 0; edgesForNode < 30; edgesForNode++) {
 				int randomIndex = rand.nextInt(RightNodes.size());
 				int destinationNode = RightNodes.get(randomIndex);
-				result[node].add(new Edge(node, destinationNode, 1));
-								
+				result[node].add(new Edge(node, destinationNode, 1));								
 			}				
 		}
-		
-		
+
+
 		for (int i = 0; i < result.length; i++) {
-		System.out.println("graph from text node i = " + i);
-		for (Edge e : result[i]) {
-			System.out.println(e.toString(e.from, e.to));				
-		}					
-	}
-		
+			System.out.println("graph from text node i = " + i);
+			for (Edge e : result[i]) {
+				System.out.println(e.toString(e.from, e.to));				
+			}					
+		}
+
 		return result;
 	}
-	
-	
-	
-//////////////////////////////////File methods///////////////////////////////////////
-	
-	
+
+
+
+	//////////////////////////////////File methods///////////////////////////////////////
+
+
 	/*
 	 * Build solver from file, first line is num of vertices, source vertex num, target vertex num
 	 * all other lines are edges: from vertex num, to vertex num, capacity of the edge
@@ -525,7 +508,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 		return solver;
 
 	}
-	
+
 	/*
 	 * Build graph from file, first line is num of vertices
 	 * all other lines are edges: from vertex num, to vertex num, capacity of the edge
@@ -548,8 +531,8 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 			}
 			//file ERROR
 		}
-		
-//		System.out.println(vertices);
+
+		//		System.out.println(vertices);
 		List<Edge>[] originalGraph = new List[vertices];
 		for (int i = 0; i < originalGraph.length; i++)
 			originalGraph[i] = new ArrayList<Edge>();
@@ -569,7 +552,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 					capacity = (int)stok.nval;
 				stok.nextToken();
 			}
-//			System.out.println("edge in line: " + lineNum + " from: " + from + " to: " + to + " capacity: " + capacity);
+			//			System.out.println("edge in line: " + lineNum + " from: " + from + " to: " + to + " capacity: " + capacity);
 			originalGraph[from].add(new Edge(from, to, capacity));
 			stok.nextToken();
 		}

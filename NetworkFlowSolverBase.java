@@ -1,4 +1,10 @@
-package Test;
+/**
+ * Alex Shimanovich
+ * Base class for network min cut max flow algorithm
+ * Contains Edge class and a graph representation as adjacency list 
+ * All the BIG methods and value refer to graph we build to help us find cut in nodes
+ * 
+ */
 
 import static java.lang.Math.min;
 
@@ -10,7 +16,6 @@ public abstract class NetworkFlowSolverBase {
 	// To avoid overflow, set infinity to a value less than Integer.MAX_VALUE;
 	protected static final int INF = Integer.MAX_VALUE / 4;
 
-	
 	//Edge class containing simple straightforward methods
 	public static class Edge {
 		public int from, to;
@@ -42,14 +47,14 @@ public abstract class NetworkFlowSolverBase {
 		}
 
 		public String toString(int s, int t) {
-//			String u = (from == s) ? "s" : ((from == t) ? "t" : String.valueOf(from));
-//			String v = (to == s) ? "s" : ((to == t) ? "t" : String.valueOf(to));
+			//			String u = (from == s) ? "s" : ((from == t) ? "t" : String.valueOf(from));
+			//			String v = (to == s) ? "s" : ((to == t) ? "t" : String.valueOf(to));
 			String u = String.valueOf(from);
 			String v =  String.valueOf(to);
 			return String.format("Edge %s -> %s | flow = %d | capacity = %d | is residual: %s", 
 					u, v, flow, capacity, isResidual());			
 		}
-		
+
 		public boolean isMinCut() {
 			return capacity == flow;
 		}
@@ -62,7 +67,6 @@ public abstract class NetworkFlowSolverBase {
 	//flow values
 	protected long maxFlow;
 	protected long bigMaxFlow;
-
 
 	//nodes left of cut
 	protected boolean[] leftOfCut;
@@ -85,20 +89,18 @@ public abstract class NetworkFlowSolverBase {
 	private int[] visited;
 	private int[] bigVisited;
 
-
 	// Indicates whether the network flow algorithm has ran. We should not need to
 	// run the solver multiple times, because it always yields the same result.
 	private boolean solvedBFS;	
 	private boolean bigSolvedBFS;
 
 
-	/**
-	 * Creates an instance of a flow network solver. Use the {@link #addEdge}
-	 * method to add edges to the graph.
-	 * @param n - The number of nodes in the graph including source and sink nodes.
-	 * @param s - The index of the source node, 0 <= s < n
-	 * @param t - The index of the sink node, 0 <= t < n, t != s
-	 */
+
+	// Creates an instance of a flow network solver. Use the {@link #addEdge}
+	// method to add edges to the graph.
+	// @param n - The number of nodes in the graph including source and sink nodes.
+	// @param s - The index of the source node, 0 <= s < n
+	// @param t - The index of the sink node, 0 <= t < n, t != s
 	public NetworkFlowSolverBase(int n, int s, int t) {
 		this.n = n; this.s = s; this.t = t; 
 		this.bigN = n * 2; this.bigS = s * 2; this.bigT = t * 2; 
@@ -118,12 +120,10 @@ public abstract class NetworkFlowSolverBase {
 			graph[i] = new ArrayList<Edge>();
 	}
 
-	/**
-	 * Adds a directed edge (and residual edge) to the flow graph.
-	 * @param from     - The index of the node the directed edge starts at.
-	 * @param to       - The index of the node the directed edge ends at.
-	 * @param capacity - The capacity of the edge.
-	 */
+	// Adds a directed edge (and residual edge) to the flow graph.
+	// @param from     - The index of the node the directed edge starts at.
+	// @param to       - The index of the node the directed edge ends at.
+	// @param capacity - The capacity of the edge.
 	public void addEdge(int from, int to, long capacity) {
 		if (capacity < 0) throw new IllegalArgumentException("Capacity < 0");
 		Edge e1 = new Edge(from, to, capacity);
@@ -133,9 +133,9 @@ public abstract class NetworkFlowSolverBase {
 		graph[from].add(e1);
 		graph[to].add(e2);
 	}
-	
+
 	//Create a big graph based on conversion of real graph - each vertex becomes two vertices and edge.
-	//Create edge from each vertex, make it minimal capacity (1) so it will be selected as min cut
+	//Create new edge from each vertex, make it minimal capacity (1) so it will be selected as min cut
 	//so we can know which nodes in original graph are the cut nodes
 	public void initBigGraph() {
 		bigGraph = new List[bigN];
@@ -168,23 +168,23 @@ public abstract class NetworkFlowSolverBase {
 				}
 			}			
 		}
-		
-		
+
+
 		//print big graph
-//		for (int i = 0; i < bigGraph.length; i++) {
-//			System.out.println("Big graph node i = " + i);
-//			for (Edge e : bigGraph[i]) {
-//				System.out.println(e.toString(e.from, e.to));				
-//			}					
-//		}
-				
+		//		for (int i = 0; i < bigGraph.length; i++) {
+		//			System.out.println("Big graph node i = " + i);
+		//			for (Edge e : bigGraph[i]) {
+		//				System.out.println(e.toString(e.from, e.to));				
+		//			}					
+		//		}
+
 	}
-	
+
 	// Marks node 'i' as visited.
 	public void visit(int i) {
 		visited[i] = visitedToken;
 	}
-	
+
 	// Marks node 'i' as visited.
 	public void bigVisit(int i) {
 		bigVisited[i] = bigVisitedToken;
@@ -194,7 +194,7 @@ public abstract class NetworkFlowSolverBase {
 	public boolean visited(int i) {
 		return visited[i] == visitedToken;
 	}
-	
+
 	// Returns whether or not node 'i' has been visited.
 	public boolean bigVisited(int i) {
 		return bigVisited[i] == bigVisitedToken;
@@ -205,20 +205,19 @@ public abstract class NetworkFlowSolverBase {
 	public void markAllNodesAsUnvisited() {
 		visitedToken++;
 	}
-	
+
 	// Resets all nodes as unvisited. This is especially useful to do
 	// between iterations of finding augmenting paths, O(1)
 	public void bigMarkAllNodesAsUnvisited() {
 		bigVisitedToken++;
 	}
 
-	/**
-	 * Returns the graph after the solver has been executed. This allows you to
-	 * inspect the {@link Edge#flow} compared to the {@link Edge#capacity} in 
-	 * each edge. This is useful if you want to figure out which edges were 
-	 * used during the max flow.
-	 * @param big  -if we handle big graph
-	 */
+
+	// Returns the graph after the solver has been executed. This allows you to
+	// inspect the {@link Edge#flow} compared to the {@link Edge#capacity} in 
+	// each edge. This is useful if you want to figure out which edges were 
+	// used during the max flow.
+	// @param big  -if we handle big graph
 	public List<Edge>[] getGraph(boolean big) {
 		execute(big);
 		return big ? bigGraph : graph;
