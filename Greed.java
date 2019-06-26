@@ -1,13 +1,15 @@
-// Kosaraju's (DFS based) algorithm for finding  SCC in a graph
+// Greedy local search for finding node separators in graph 
+// using implementation of Kosaraju's (DFS based) algorithm for finding SCC in a graph
 //Alex Shimanovich
 
 import java.io.*; 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 class GreedGraph 
 { 
-
+	//Result class for collecting candidates for separators
 	private static class Result{
 		private int SCC_Size;
 		private LinkedList<Integer> indexesOfSeparator;		
@@ -56,11 +58,9 @@ class GreedGraph
 			adj[i] = new LinkedList(); 
 	} 
 
-	/**
-	 * Function to add an edge into the graph 
-	 * @param v source vertex
-	 * @param w destination vertex
-	 */
+	// Function to add an edge into the graph 
+	// @param v source vertex
+	// @param w destination vertex 
 	private void addEdge(int v, int w){ 
 		adj[v].add(w); 
 	} 
@@ -85,6 +85,9 @@ class GreedGraph
 	} 
 
 	// Fill vertices in stack according to their DFS finishing times 
+	// @param v the current node
+	// @param visited[] current state of graph nodes
+	// @param stack the current stack
 	private void fillDfsOrder(int v, boolean visited[], Stack stack) 
 	{ 
 		// Mark the current node as visited
@@ -105,6 +108,11 @@ class GreedGraph
 	} 
 
 	// A recursive function to print DFS starting from v 
+	// when called on transposed graph with stack filled in visited order it can print the SCC 
+	// @param v the current node
+	// @param visited[] current state of graph nodes
+	// @param origin the origin of current node v 
+	// @param print if we want to print the current DFS flow
 	private void DFSUtil(int v, boolean visited[], int origin, boolean print){ 
 		// Mark the current node as visited and print it 
 		visited[v] = true;
@@ -122,7 +130,7 @@ class GreedGraph
 
 	} 
 
-	// The main function that finds and prints all strongly 
+	// The method that finds and prints all strongly 
 	// connected components in Graph
 	// return the size of biggest SCC in the graph
 	private int findSCCs(boolean print) 
@@ -180,7 +188,6 @@ class GreedGraph
 		return biggestScc;
 	} 
 
-
 	//get random integer in range [min, max] (inclusive)
 	public int randomIntRange(int min, int max){
 		int x = (int)(Math.random() * ( (max - min) + 1) ) + min;
@@ -192,10 +199,10 @@ class GreedGraph
 	//we make sure that with the random separator the biggest SCC is smaller than 2/3 of V 
 	public void randomSeparator(int n){
 		int node;
-		separatorToken++;
-		indexesOfSeparator.clear();
 		Random rand = new Random(); 
 		do{
+			separatorToken++;
+			indexesOfSeparator.clear();
 			for(int i = 0; i < n; i++) {
 				do {
 					node = rand.nextInt(V); // random between [0,V) - every node in graph can be part of separator	
@@ -204,10 +211,10 @@ class GreedGraph
 				indexesOfSeparator.add(node); //collect all indexes of the separator
 			}
 		}while(findSCCs(false) > (int)(0.666 * V)); //if this separator creates too big SCC look for another separator
-//		separatorArray[3] = separatorToken; //collect all indexes of the separator
-//		indexesOfSeparator.add(3); //collect all indexes of the separator
-//		separatorArray[4] = separatorToken; //collect all indexes of the separator
-//		indexesOfSeparator.add(4); //collect all indexes of the separator
+		//		separatorArray[3] = separatorToken; //collect all indexes of the separator
+		//		indexesOfSeparator.add(3); //collect all indexes of the separator
+		//		separatorArray[4] = separatorToken; //collect all indexes of the separator
+		//		indexesOfSeparator.add(4); //collect all indexes of the separator
 	}
 
 	//move one random node from the separator back to graph
@@ -217,7 +224,7 @@ class GreedGraph
 		int indexToMoveBack = indexesOfSeparator.get(randomIndex); //randomly select one index	
 		separatorArray[indexToMoveBack]--; //remove it from the separator (it no longer equals current separator token)
 		indexesOfSeparator.remove(randomIndex); //remove it from the indexes list
-		System.out.println("moving back node " + indexToMoveBack);
+		System.out.println("moving node " + indexToMoveBack + " from separator back to graph ");
 	}
 
 	// Test engine
@@ -234,15 +241,16 @@ class GreedGraph
 		g.addEdge(5, 6);
 		g.addEdge(6, 4);*/
 
-		System.out.println("before Start Ishiiiiit"); 
-		GreedGraph g = TextToGraph("C:\\Users\\JERLocal\\eclipse-workspace\\Test\\src\\10Node.txt");
-		System.out.println("Start Ishiiiiit"); 
+		System.out.println("Read text to graph"); 
+		GreedGraph g = TextToGraph("C:\\Users\\JERLocal\\eclipse-workspace\\FlowSeparator\\src\\800Node.txt");
+		System.out.println("Start iterations"); 
 		int iteration = 0;
 		int biggestSCC = 0;
 		LinkedList<Result> results = new LinkedList(); //collect the best results from each run
 		Result res = null;
-		while(iteration < 20) {
-			int separatorSize = 5;
+		long startTimeGreed = System.nanoTime();
+		while(iteration < 5) {
+			int separatorSize = 400;
 			g.randomSeparator(separatorSize); //create random separator in graph
 			System.out.println("Start ITERATION: " + iteration); 
 			System.out.println("Initial random separator is : " + Arrays.toString(g.indexesOfSeparator.toArray()));
@@ -251,7 +259,7 @@ class GreedGraph
 				System.out.println("Separator now: " + Arrays.toString(g.indexesOfSeparator.toArray())); 
 				g.moveNodeBackToGraph(); 
 				biggestSCC = g.findSCCs(true);
-				if(biggestSCC > (int)(0.666 * g.V)) {
+				if(biggestSCC > (int)(0.766 * g.V)) { //limit SCC size
 					System.out.println("Biggest scc is too big, size: " + biggestSCC + " DEAD END");
 					break;
 				}
@@ -265,17 +273,23 @@ class GreedGraph
 			System.out.println("End ITERATION: " + iteration);
 			iteration++;
 		}
+		long endTimeGreed = System.nanoTime();
+		long total = TimeUnit.MILLISECONDS.convert(endTimeGreed - startTimeGreed, TimeUnit.NANOSECONDS);
+
 
 		System.out.println("Lets look at some interesting results");
 		if(results.size() > 0) {
 			for(Result resIterator : results)
 				System.out.println(resIterator);
 		}
-
+		System.out.println("total time: " +total+ " miliseconds" );
 
 	} 
 
-
+	//Convert text representation of graph to adjacency list 
+	//first line is number of nodes
+	//each next line starts with origin node and after it adjoining nodes with spaces between them
+	//last line is empty
 	private static GreedGraph TextToGraph(String path) throws IOException {
 		LineNumberReader lnr = new LineNumberReader(new FileReader(path));
 		lnr.setLineNumber(1);
@@ -293,16 +307,15 @@ class GreedGraph
 			}
 			//file ERROR
 		}
-		
-		
-		System.out.println("vertices in graph" + vertices);
+
+		System.out.println("vertices in graph " + vertices);
 		GreedGraph graphToFill = new GreedGraph(vertices); 
 		int from = 0, to = 0, capacity = 0;
 		//parse all other lines, each line is edge
 		while (stok.ttype != StreamTokenizer.TT_EOF) {
 			stok.nextToken();
 			int lineNum = lnr.getLineNumber();
-			System.out.println("new line: " + lineNum);
+			//System.out.println("new line: " + lineNum);
 			if (stok.ttype == StreamTokenizer.TT_NUMBER)
 				from = (int)stok.nval; //origin node of line
 			stok.nextToken();
@@ -310,17 +323,16 @@ class GreedGraph
 				if (stok.ttype == StreamTokenizer.TT_NUMBER) {				
 					to = (int)stok.nval;
 					graphToFill.addEdge(from, to); 
-					System.out.println("edge in line: " + lineNum + " from: " + from + " to: " + to);
+					//System.out.println("edge in line: " + lineNum + " from: " + from + " to: " + to);
 				}
 				stok.nextToken();
 			}
 		}
 		lnr.close();
 		//GreedGraph graphToFill = new GreedGraph(5); 
-		System.out.println("before return");
+		//System.out.println("before return");
 		return graphToFill;
 	}
-
 
 
 } 
