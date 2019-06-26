@@ -1,9 +1,4 @@
-package testing;
-
-/**
- * @author William Fiset, william.alexandre.fiset@gmail.com
- **/
-//package com.williamfiset.algorithms.graphtheory.networkflow;
+package Test;
 
 import static java.lang.Math.min;
 
@@ -15,21 +10,22 @@ public abstract class NetworkFlowSolverBase {
 	// To avoid overflow, set infinity to a value less than Integer.MAX_VALUE;
 	protected static final int INF = Integer.MAX_VALUE / 4;
 
+	
+	//Edge class containing simple straightforward methods
 	public static class Edge {
 		public int from, to;
 		public Edge residual;
-		public long flow, cost;
-		public final long capacity, originalCost;
+		public long flow;
+		public final long capacity;
+
+		/*public Edge(int from, int to, long capacity) {
+			this(from, to, capacity);
+		}*/
 
 		public Edge(int from, int to, long capacity) {
-			this(from, to, capacity, 0 /* unused */);
-		}
-
-		public Edge(int from, int to, long capacity, long cost) {
 			this.from = from;
 			this.to = to;
 			this.capacity = capacity;
-			this.originalCost = this.cost = cost;
 		}
 
 		public boolean isResidual() {
@@ -51,8 +47,7 @@ public abstract class NetworkFlowSolverBase {
 			String u = String.valueOf(from);
 			String v =  String.valueOf(to);
 			return String.format("Edge %s -> %s | flow = %d | capacity = %d | is residual: %s", 
-					u, v, flow, capacity, isResidual());
-			
+					u, v, flow, capacity, isResidual());			
 		}
 		
 		public boolean isMinCut() {
@@ -64,9 +59,10 @@ public abstract class NetworkFlowSolverBase {
 	protected final int n, s, t;
 	protected final int bigN, bigS, bigT;
 
+	//flow values
 	protected long maxFlow;
 	protected long bigMaxFlow;
-	protected long minCost; //not relevant
+
 
 	//nodes left of cut
 	protected boolean[] leftOfCut;
@@ -76,7 +72,7 @@ public abstract class NetworkFlowSolverBase {
 	protected List<Edge>[] graph;
 	protected List<Edge>[] bigGraph;
 
-
+	//elements of the cut
 	protected ArrayList<Integer> originalCutNodes;
 	protected ArrayList<Edge> cutEdges;
 
@@ -99,7 +95,6 @@ public abstract class NetworkFlowSolverBase {
 	/**
 	 * Creates an instance of a flow network solver. Use the {@link #addEdge}
 	 * method to add edges to the graph.
-	 *n
 	 * @param n - The number of nodes in the graph including source and sink nodes.
 	 * @param s - The index of the source node, 0 <= s < n
 	 * @param t - The index of the sink node, 0 <= t < n, t != s
@@ -125,7 +120,6 @@ public abstract class NetworkFlowSolverBase {
 
 	/**
 	 * Adds a directed edge (and residual edge) to the flow graph.
-	 *
 	 * @param from     - The index of the node the directed edge starts at.
 	 * @param to       - The index of the node the directed edge ends at.
 	 * @param capacity - The capacity of the edge.
@@ -140,26 +134,8 @@ public abstract class NetworkFlowSolverBase {
 		graph[to].add(e2);
 	}
 	
-	/*
-	public void deepGraphBackup(List<Edge>[] bigGraph) {
-		for (int i = 1; i < bigGraph.length; i++) 
-			for (Edge e : bigGraph[i]) {
-				Edge temp = new Edge(e.from, e.to, e.capacity);
-				bigGraphBackup[i].add(temp);	
-			}
-				 					
-	}
-	
-	public void deepGraphRestore() {
-		for (int i = 1; i < bigGraphBackup.length; i++) 
-			for (Edge e : bigGraphBackup[i]) {
-				Edge temp = new Edge(e.from, e.to, e.capacity);
-				bigGraph[i].add(temp);	
-			}				 					
-	}*/
-	
-	//create in solver a big graph based on conversion of real graph - each vertex becomes two vertices and edge.
-	//create edge from each vertex, make it minimal capacity (1) so it will be selected as min cut
+	//Create a big graph based on conversion of real graph - each vertex becomes two vertices and edge.
+	//Create edge from each vertex, make it minimal capacity (1) so it will be selected as min cut
 	//so we can know which nodes in original graph are the cut nodes
 	public void initBigGraph() {
 		bigGraph = new List[bigN];
@@ -204,21 +180,12 @@ public abstract class NetworkFlowSolverBase {
 				
 	}
 	
-	/** Cost variant of {@link #addEdge(int, int, int)} for min-cost max-flow */
-	public void addEdge(int from, int to, long capacity, long cost) {
-		Edge e1 = new Edge(from, to, capacity, cost);
-		Edge e2 = new Edge(to, from, 0, -cost);
-		e1.residual = e2;
-		e2.residual = e1;
-		graph[from].add(e1);
-		graph[to].add(e2);
-	}
-
 	// Marks node 'i' as visited.
 	public void visit(int i) {
 		visited[i] = visitedToken;
 	}
 	
+	// Marks node 'i' as visited.
 	public void bigVisit(int i) {
 		bigVisited[i] = bigVisitedToken;
 	}
@@ -228,6 +195,7 @@ public abstract class NetworkFlowSolverBase {
 		return visited[i] == visitedToken;
 	}
 	
+	// Returns whether or not node 'i' has been visited.
 	public boolean bigVisited(int i) {
 		return bigVisited[i] == bigVisitedToken;
 	}
@@ -238,15 +206,18 @@ public abstract class NetworkFlowSolverBase {
 		visitedToken++;
 	}
 	
+	// Resets all nodes as unvisited. This is especially useful to do
+	// between iterations of finding augmenting paths, O(1)
 	public void bigMarkAllNodesAsUnvisited() {
 		bigVisitedToken++;
 	}
 
 	/**
-	 * Returns the graph after the solver has been executed. This allow you to
+	 * Returns the graph after the solver has been executed. This allows you to
 	 * inspect the {@link Edge#flow} compared to the {@link Edge#capacity} in 
 	 * each edge. This is useful if you want to figure out which edges were 
 	 * used during the max flow.
+	 * @param big  -if we handle big graph
 	 */
 	public List<Edge>[] getGraph(boolean big) {
 		execute(big);
@@ -254,45 +225,39 @@ public abstract class NetworkFlowSolverBase {
 	}
 
 	// Returns the maximum flow from the source to the sink.
+	// @param big  -if we handle big graph
 	public long getMaxFlow(boolean big) {
 		execute(big);
 		return big ? bigMaxFlow : maxFlow;
 	}
 
-	// Returns the min cost from the source to the sink.
-	// NOTE: This method only applies to min-cost max-flow algorithms.
-	public long getMinCost(boolean big) {
-		execute(big);
-		return minCost;
-	}
-
 	// Returns the min-cut of this flow network in which the nodes on the "left side"
 	// of the cut with the source are marked as true and those on the "right side" 
 	// of the cut with the sink are marked as false.
+	//@param big  -if we handle big graph
 	public boolean[] getMinCut(boolean big) {
 		execute(big);
 		return big ? bigLeftOfCut : leftOfCut;
 	}
 
 	// Wrapper method that ensures we only call solve() once
+	//@param big  -if we handle big graph
 	private void execute(boolean big) {
-		if (solvedBFS && !big || bigSolvedBFS && big) return;
+		if (solvedBFS && !big || bigSolvedBFS && big) return; //run only once per graph
 		if (!big) {
 			solvedBFS = true;
 			solveBFS();	
 			return;
 		}
-		//big
+		//big graph
 		initBigGraph(); //build big graph based on original graph
 		bigSolvedBFS = true;
 		bigSolveBFS();
 	}
 
 
-	// Method to implement which solves the network flow problem.
+	// Methods to implement which solves the network flow problem.
 	public abstract void solveBFS();
-	
 	public abstract void bigSolveBFS();
-
 
 }

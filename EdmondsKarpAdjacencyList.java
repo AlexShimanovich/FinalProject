@@ -1,4 +1,4 @@
-package testing;
+package Test;
 /**
  * An implementation of the Edmonds-Karp algorithm which is essentially
  * Ford-Fulkerson with a BFS as a method of finding augmenting paths. 
@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import testing.NetworkFlowSolverBase.Edge;
+import Test.NetworkFlowSolverBase.Edge;
 
 public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 
@@ -202,20 +202,21 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 //////////////////////////////////MAIN///////////////////////////////////////	
 	
 	/* Example */
-	//"C:\\Users\\JERLocal\\eclipse-workspace\\testing\\src\\testing\\alex.txt"
+	//"C:\\Users\\JERLocal\\eclipse-workspace\\Test\\src\\alex.txt"
 	public static void main(String[] args) throws IOException, InterruptedException {
 		long startTimeBFS = 0;//System.nanoTime();
 		long endTimeBFS = 0;//System.nanoTime();
 		long startTimeDFS = 0;//System.nanoTime();
 		long endTimeDFS = 0;//System.nanoTime();
-		testSmallFlowGraph();
+		separatorEngine();
 	}
 
 
-	private static void testSmallFlowGraph() throws IOException {
+	//driver function to create and/or read graph from file  
+	private static void separatorEngine() throws IOException {
 		
 		//parse txt to adjacency list
-		List<Edge>[] originalGraph = graphFromFile("C:\\Users\\JERLocal\\eclipse-workspace\\testing\\src\\testing\\choke.txt");
+		List<Edge>[] originalGraph = graphFromFile("C:\\Users\\JERLocal\\eclipse-workspace\\Test\\src\\choke.txt");
 
 		originalGraph = growTestGraph(originalGraph, 10);
 
@@ -528,7 +529,7 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 	/*
 	 * Build graph from file, first line is num of vertices
 	 * all other lines are edges: from vertex num, to vertex num, capacity of the edge
-	 * last lien empty
+	 * last line empty
 	 */
 	private static List<Edge>[] graphFromFile(String filePath) throws IOException {
 		LineNumberReader lnr = new LineNumberReader(new FileReader(filePath));
@@ -546,8 +547,8 @@ public class EdmondsKarpAdjacencyList extends NetworkFlowSolverBase {
 				break;
 			}
 			//file ERROR
-
 		}
+		
 //		System.out.println(vertices);
 		List<Edge>[] originalGraph = new List[vertices];
 		for (int i = 0; i < originalGraph.length; i++)
