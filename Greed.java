@@ -242,7 +242,16 @@ class GreedGraph
 		g.addEdge(6, 4);*/
 
 		System.out.println("Read text to graph"); 
-		GreedGraph g = TextToGraph("C:\\Users\\JERLocal\\eclipse-workspace\\FlowSeparator\\src\\800Node.txt");
+		//GreedGraph g = graphFromFileAdjacency("C:\\Users\\JERLocal\\eclipse-workspace\\FlowSeparator\\src\\10Node.txt");
+		GreedGraph g = buildGrid(3 ,4);
+		
+		for (int i = 0; i < g.V; i++) {
+			System.out.println("graph from node i = " + i);
+			for (int e : g.adj[i]) {
+				System.out.println("to " + e);				
+			}					
+		}
+		
 		System.out.println("Start iterations"); 
 		int iteration = 0;
 		int biggestSCC = 0;
@@ -250,7 +259,7 @@ class GreedGraph
 		Result res = null;
 		long startTimeGreed = System.nanoTime();
 		while(iteration < 5) {
-			int separatorSize = 400;
+			int separatorSize = g.V/2; //start with separator half size
 			g.randomSeparator(separatorSize); //create random separator in graph
 			System.out.println("Start ITERATION: " + iteration); 
 			System.out.println("Initial random separator is : " + Arrays.toString(g.indexesOfSeparator.toArray()));
@@ -290,7 +299,7 @@ class GreedGraph
 	//first line is number of nodes
 	//each next line starts with origin node and after it adjoining nodes with spaces between them
 	//last line is empty
-	private static GreedGraph TextToGraph(String path) throws IOException {
+	private static GreedGraph graphFromFileAdjacency(String path) throws IOException {
 		LineNumberReader lnr = new LineNumberReader(new FileReader(path));
 		lnr.setLineNumber(1);
 		StreamTokenizer stok = new StreamTokenizer(lnr);
@@ -329,10 +338,24 @@ class GreedGraph
 			}
 		}
 		lnr.close();
-		//GreedGraph graphToFill = new GreedGraph(5); 
 		//System.out.println("before return");
 		return graphToFill;
 	}
 
+	private static GreedGraph buildGrid(int x, int y) {
+		int size = x * y;
+		GreedGraph graphToFill = new GreedGraph(size); 
+		for(int node = 0; node < size; node ++) {
+			if(node % x <  x - 1) //we have nodes to the right
+				graphToFill.addEdge(node, node + 1); //add edge to node to right
+			if(node + x < size) //we have space below
+				graphToFill.addEdge(node, node + x); //add edge to node below
+			if(node - x > 0) //we have space above
+				graphToFill.addEdge(node, node - x); //add edge to node above
+			if(node % x != 0) //we have nodes to the left
+				graphToFill.addEdge(node, node - 1); //add edge to node to left			
+		}
+		return graphToFill;
+	}
 
 } 
